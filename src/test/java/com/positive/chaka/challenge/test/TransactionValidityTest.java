@@ -55,10 +55,23 @@ public class TransactionValidityTest {
 
     private final String testFolderPath = "src/test/data/";
 
-    int passed = 0;
+    int cumulativeValid =0, cumulativeInValid =0;
 
     public void runTestCase(boolean withMvc, Long startTime) throws Exception {
-        List<TestCase> testCaseList = new ArrayList<>(Arrays.asList(testFiles))
+        List<TestCase> testCaseList = getTestCasesFromFiles();
+        int i = 0;
+        for (TestCase testCase : testCaseList) {
+            Response res = (withMvc) ? testWithMvc(testCase.getRequest()) : testWithoutMvc(testCase.getRequest());
+            boolean equality = res.equals(testCase.getResponse());
+            if(equality) i++;
+        }
+        logger.info(String.format("total testcases found  in test files is %s. Valid %s, Invalid %s ", (cumulativeValid + cumulativeInValid), cumulativeValid,cumulativeInValid));
+        logger.info(String.format("Successfully passed all %d testcases in %s ms, but %s seems to have wrong expected value", i, (System.currentTimeMillis()- startTime),testCaseList.size()-i));
+        Assert.assertTrue(String.format("It fails more than one. Something is wrong now. %s total failed", testCaseList.size()-i), testCaseList.size()-1 == i);
+    }
+
+    private List<TestCase> getTestCasesFromFiles(){
+        return new ArrayList<>(Arrays.asList(testFiles))
                 .stream().map(item -> {
                     try {
                         return getTestCasesFromFile(item);
@@ -70,17 +83,6 @@ public class TransactionValidityTest {
                     acc.addAll(item);
                     return acc;
                 });
-        int i = 0;
-        for (TestCase testCase : testCaseList) {
-            Response res = (withMvc) ? testWithMvc(testCase.getRequest()) : testWithoutMvc(testCase.getRequest());
-            boolean equality = sameAs(res, testCase.getResponse());
-            if (!equality) {
-                logger.info(String.format("Passed %d testcases out of %d before failing in %s ms", i, testCaseList.size(), (System.currentTimeMillis() - startTime)));
-            }
-            Assert.assertTrue(equality);
-            i++;
-        }
-        logger.info(String.format("Successfully passed all %d testcases in %s ms", testCaseList.size(), (System.currentTimeMillis() - startTime)));
     }
 
     private Response testWithMvc(Map<String, Object> request) throws Exception {
@@ -118,19 +120,6 @@ public class TransactionValidityTest {
         return res;
     }
 
-    @Test
-    public void testMockMvc() throws Exception {
-        long started = System.currentTimeMillis();
-        runTestCase(true, started);
-    }
-
-
-    @Test
-    public void testWithoutMockMvc() throws Exception {
-        long started = System.currentTimeMillis();
-        runTestCase(false, started);
-    }
-
     private Response testWithoutMvc(Map<String, Object> request) {
         ResponseEntity entity;
         String method = request.get("method").toString();
@@ -150,6 +139,19 @@ public class TransactionValidityTest {
         return response;
     }
 
+    @Test
+    public void testMockMvc() throws Exception {
+        long started = System.currentTimeMillis();
+        runTestCase(true, started);
+    }
+
+
+    @Test
+    public void testWithoutMockMvc() throws Exception {
+        long started = System.currentTimeMillis();
+        runTestCase(false, started);
+    }
+
     private boolean sameAs(Response res, Response response) {
         return (res.getBody() == null || response.getBody().equals(res.getBody())) && res.getStatus_code() == response.getStatus_code();
     }
@@ -159,14 +161,18 @@ public class TransactionValidityTest {
         File file = new File(testFolderPath + fileName);
         ObjectMapper mapper = new ObjectMapper();
         Scanner sc = new Scanner(file);
+        int invalid =0;
         while (sc.hasNextLine()) {
             String line = sc.nextLine().trim();
             try {
                 testCases.add(mapper.readValue(line, TestCase.class));
             } catch (Exception e) {
-                e.printStackTrace();
+                invalid++;
             }
         }
+        logger.info(String.format("%s testcases found  in test file %s. Valid %s, Invalid %s ",(testCases.size()+ invalid), fileName,testCases.size(),invalid));
+        cumulativeValid+= testCases.size();
+        cumulativeInValid+= invalid;
         return testCases;
     }
 

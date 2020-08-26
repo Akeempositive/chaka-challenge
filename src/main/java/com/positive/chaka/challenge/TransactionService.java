@@ -90,11 +90,6 @@ public class TransactionService {
         return ResponseEntity.status(200).body(statistics);
     }
 
-    public ResponseEntity deleteAllTransactions() {
-        transactionRepository.deleteAllTransactions();
-        return ResponseEntity.status(204).body(null);
-    }
-
     private BigDecimal getAverage(Stream<Double> amounts) {
         return Util.toBigDecimalWithDp(amounts.mapToDouble(Double::doubleValue).average().orElse(0.00), 2);
     }
@@ -111,6 +106,10 @@ public class TransactionService {
         return Util.toBigDecimalWithDp(amounts.min(Double::compareTo).orElse(0.00), 2);
     }
 
+    public ResponseEntity deleteAllTransactions() {
+        transactionRepository.deleteAllTransactions();
+        return ResponseEntity.status(204).body(null);
+    }
     class UnParseabeJsonException extends Exception {
         public UnParseabeJsonException() {
             super("Invalid Json Values");

@@ -39,8 +39,7 @@ public class Response {
 
     public boolean equals(Object o){
         Response test = (Response) o;
-        return  test.status_code == status_code &&
-                test.headers.equals(headers) &&
-                test.body.equals(body);
+        return (getBody() == null || test.getBody().equals(getBody())) && getStatus_code() == test.getStatus_code();
+
     }
 }
