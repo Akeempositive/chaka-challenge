@@ -65,8 +65,8 @@ public class TransactionValidityTest {
             boolean equality = res.equals(testCase.getResponse());
             if(equality) i++;
         }
-        logger.info(String.format("total testcases found  in test files is %s. Valid %s, Invalid %s ", (cumulativeValid + cumulativeInValid), cumulativeValid,cumulativeInValid));
-        logger.info(String.format("Successfully passed all %d testcases in %s ms, but %s seems to have wrong expected value", i, (System.currentTimeMillis()- startTime),testCaseList.size()-i));
+        //logger.info(String.format("total testcases found  in test files is %s. Valid %s, Invalid %s ", (cumulativeValid + cumulativeInValid), cumulativeValid,cumulativeInValid));
+        //logger.info(String.format("Successfully passed all %d testcases in %s ms, but %s seems to have wrong expected value", i, (System.currentTimeMillis()- startTime),testCaseList.size()-i));
         Assert.assertTrue(String.format("It fails more than one. Something is wrong now. %s total failed", testCaseList.size()-i), testCaseList.size()-1 == i);
     }
 
@@ -143,6 +143,7 @@ public class TransactionValidityTest {
     public void testMockMvc() throws Exception {
         long started = System.currentTimeMillis();
         runTestCase(true, started);
+        System.out.println(String.format("It takes %d ms to complete", System.currentTimeMillis() - started));
     }
 
 
@@ -150,6 +151,7 @@ public class TransactionValidityTest {
     public void testWithoutMockMvc() throws Exception {
         long started = System.currentTimeMillis();
         runTestCase(false, started);
+        System.out.println(String.format("It takes %d ms to complete", System.currentTimeMillis() - started));
     }
 
     private boolean sameAs(Response res, Response response) {
@@ -170,7 +172,7 @@ public class TransactionValidityTest {
                 invalid++;
             }
         }
-        logger.info(String.format("%s testcases found  in test file %s. Valid %s, Invalid %s ",(testCases.size()+ invalid), fileName,testCases.size(),invalid));
+        //logger.info(String.format("%s testcases found  in test file %s. Valid %s, Invalid %s ",(testCases.size()+ invalid), fileName,testCases.size(),invalid));
         cumulativeValid+= testCases.size();
         cumulativeInValid+= invalid;
         return testCases;

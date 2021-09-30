@@ -8,7 +8,7 @@ public class BinaryGap {
         sc.close();
     }
 
-    static int maxBinaryGap(long number){
+    public static int maxBinaryGap(long number){
         while(number % 2 ==0) number/=2;
         String convertToBase2 = Long.toBinaryString(number);
         String text = "0";
@@ -19,4 +19,6 @@ public class BinaryGap {
         }
         return count;
     }
+
+
 }
